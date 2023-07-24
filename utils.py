@@ -117,3 +117,60 @@ def create_array(df):
         scaler = StandardScaler()
         arr_numpy = scaler.fit_transform(arr_numpy.T).T
     return arr_numpy , np.array(df["Label"])
+
+cpalette = ["#FF2D00", "#0050FF", "#00FF2D","#DD00FF", "#0C0052"]
+def clustering(y):
+    # Finds position of labels and returns a dictionary of cluster labels to data indices.
+    yu = np.sort(np.unique(y))
+    clustering = OrderedDict()
+    for ye in yu:
+        clustering[ye] = np.where(y == ye)[0]
+    return clustering
+
+def entropy(c, n_sample):
+    # Measures the entropy of a cluster
+    h = 0.
+    for kc in c.keys():
+        p=len(c[kc])/n_sample
+        h+=p*np.log(p)
+    h*=-1.
+    return h
+
+def NMI(y_true, y_pred):
+    # Computes Simoized mutual information: where y_true and y_pred are both clustering assignments
+    
+    w = clustering(y_true)
+    c = clustering(y_pred)
+    n_sample = len(y_true)
+
+    Iwc = 0.
+    for kw in w.keys():
+        for kc in c.keys():
+            w_intersect_c=len(set(w[kw]).intersection(set(c[kc])))
+            if w_intersect_c > 0:
+                Iwc += w_intersect_c*np.log(n_sample*w_intersect_c/(len(w[kw])*len(c[kc])))
+    Iwc/=n_sample
+    Hc = entropy(c,n_sample)
+    Hw = entropy(w,n_sample)
+
+    return 2*Iwc/(Hc+Hw)
+
+    from sklearn.cluster import DBSCAN
+
+#cpalette = ["#00A6AA", "#0000A6", "#FF4A46"]
+cpalette = ["#FF2D00", "#0050FF", "#00FF2D","#DD00FF", "#0C0052"]
+
+def plotting_ax(X, y, ax):
+    # plotting function
+    for i, yu in enumerate(np.unique(y)):
+        pos = (y == yu)   
+        ax.minorticks_on()
+        ax.set_facecolor("whitesmoke")
+        ax.scatter(X[pos,0], X[pos,1],c=cpalette[i%len(cpalette)],s=8)
+def plotting_ax(X, y, ax):
+    # plotting function
+    for i, yu in enumerate(np.unique(y)):
+        pos = (y == yu)   
+        ax.minorticks_on()
+        ax.set_facecolor("whitesmoke")
+        ax.scatter(X[pos,0], X[pos,1],c=cpalette[i%len(cpalette)],s=8)

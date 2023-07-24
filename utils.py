@@ -14,6 +14,18 @@ import scipy
 from scipy import signal
 import matplotlib as mpl
 from matplotlib.transforms import Bbox
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+from sklearn.cluster import KMeans, DBSCAN
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import mean_squared_error
+from sklearn.model_selection import train_test_split
+import sklearn.metrics
+import matplotlib.pyplot as plt
+from matplotlib.gridspec import GridSpec
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+from PIL import Image
+import time
 
 # DECODING FUNCTIONS
 def convert_array_to_signed_int(data, offset, length):
@@ -86,3 +98,22 @@ def full_extent(ax, pad=0.0):
     bbox = Bbox.union([item.get_window_extent() for item in items])
 
     return bbox.expanded(1.0 + pad, 1.0 + pad)
+
+def create_array(df):
+    scaled = True
+    arr = np.array(df["Signal"])
+    arr_numpy = []
+    for i in range(len(arr)):
+        arr[i] = arr[i].replace("[","")
+        arr[i] = arr[i].replace("\n","")
+        arr[i] = arr[i].replace("]","")
+        float_list = []
+        for item in arr[i].split():  
+            float_list.append(float(item))
+        arr_numpy.append(float_list)
+        
+    arr_numpy = np.array(arr_numpy)
+    if scaled:
+        scaler = StandardScaler()
+        arr_numpy = scaler.fit_transform(arr_numpy.T).T
+    return arr_numpy , np.array(df["Label"])
